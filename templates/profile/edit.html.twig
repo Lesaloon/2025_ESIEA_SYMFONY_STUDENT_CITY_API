@@ -1,0 +1,68 @@
+{% extends 'layouts/with_navbar.html.twig' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">Mon Profil</h1>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                        {{ form_widget(form) }}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Enregistrer
+                        </button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = {
+            pseudo: form.querySelector('[name$="[pseudo]"]').value,
+            email: form.querySelector('[name$="[email]"]').value,
+            plainPassword: form.querySelector('[name$="[plainPassword]"]').value
+        };
+
+        // Récupérer l'ID de l'utilisateur depuis les données du formulaire
+        const userId = {{ app.user.id }};
+
+        fetch(`/api/profile/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(json => {
+            if (json.success) {
+                alert('Profil mis à jour avec succès !');
+                window.location.reload();
+            } else {
+                alert('Erreur : ' + (json.message || 'Inconnue'));
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors de la requête');
+        });
+    });
+});
+</script>
+{% endblock %}
