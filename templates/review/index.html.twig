@@ -42,11 +42,12 @@
                         <th>Note</th>
                         <th>Commentaire</th>
                         <th>Date</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="reviews-tbody">
                     <tr>
-                        <td colspan="4" class="text-center text-muted">Chargement...</td>
+                        <td colspan="5" class="text-center text-muted">Chargement...</td>
                     </tr>
                 </tbody>
             </table>
@@ -67,22 +68,27 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderTable(reviews) {
         reviewsTbody.innerHTML = '';
         if (reviews.length === 0) {
-            reviewsTbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Aucun avis pour le moment.</td></tr>';
+            reviewsTbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Aucun avis pour le moment.</td></tr>';
         } else {
             reviews.forEach(review => {
                 reviewsTbody.innerHTML += `
-                    <tr>
+                    <tr data-id="${review.id}">
                         <td>${review.place.name}</td>
                         <td>
                             <span class="text-warning">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
                             <span class="ms-1">${review.rating}.0</span>
                         </td>
-                        <td>${review.commentaire.length > 40 ? review.commentaire.substring(0, 40) + '...' : review.commentaire}</td>
+                        <td class="review-comment">${review.commentaire.length > 40 ? review.commentaire.substring(0, 40) + '...' : review.commentaire}</td>
                         <td>${review.createAt ? new Date(review.createAt).toLocaleDateString() : ''}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary edit-review" title="Modifier"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger delete-review" title="Supprimer"><i class="fas fa-trash"></i></button>
+                        </td>
                     </tr>
                 `;
             });
         }
+        attachReviewActions();
     }
 
     function filterAndRender() {
@@ -99,16 +105,83 @@ document.addEventListener('DOMContentLoaded', function() {
         renderTable(filtered);
     }
 
-    // Charger les avis de l'utilisateur connecté
-    fetch('/api/reviews', {
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
-    })
-    .then(r => r.json())
-    .then(data => {
-        allReviews = data;
-        filterAndRender();
-    });
+    function loadReviews() {
+        reviewsTbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Chargement...</td></tr>';
+        fetch('/api/reviews', {
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+        })
+        .then(r => r.json())
+        .then(data => {
+            allReviews = data;
+            filterAndRender();
+        });
+    }
 
+    function attachReviewActions() {
+        reviewsTbody.querySelectorAll('.edit-review').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tr = btn.closest('tr');
+                const id = tr.dataset.id;
+                const currentComment = tr.querySelector('.review-comment').textContent;
+                const currentRating = tr.querySelector('.text-warning').textContent.length;
+
+                tr.innerHTML = `
+                    <td colspan="5">
+                        <form class="edit-review-form d-flex align-items-center gap-2">
+                            <input type="number" min="1" max="5" value="${currentRating}" class="form-control form-control-sm" style="width:80px;" required>
+                            <input type="text" value="${currentComment}" class="form-control form-control-sm" style="width:300px;" maxlength="255" required>
+                            <button type="submit" class="btn btn-sm btn-success">Enregistrer</button>
+                            <button type="button" class="btn btn-sm btn-secondary cancel-edit">Annuler</button>
+                        </form>
+                    </td>
+                `;
+                tr.querySelector('.cancel-edit').onclick = () => loadReviews();
+                tr.querySelector('.edit-review-form').onsubmit = function(e) {
+                    e.preventDefault();
+                    const rating = this.querySelector('input[type=number]').value;
+                    const commentaire = this.querySelector('input[type=text]').value;
+                    fetch('/api/reviews/' + id, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+                        },
+                        body: JSON.stringify({ rating, commentaire })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadReviews();
+                        } else {
+                            alert(data.message || 'Erreur lors de la modification');
+                        }
+                    });
+                };
+            });
+        });
+
+        reviewsTbody.querySelectorAll('.delete-review').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!confirm('Supprimer cet avis ?')) return;
+                const id = btn.closest('tr').dataset.id;
+                fetch('/api/reviews/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        loadReviews();
+                    } else {
+                        alert(data.message || 'Erreur lors de la suppression');
+                    }
+                });
+            });
+        });
+    }
+
+    // Initialisation
+    loadReviews();
     filterEtab.addEventListener('input', filterAndRender);
     filterRating.addEventListener('change', filterAndRender);
 });
