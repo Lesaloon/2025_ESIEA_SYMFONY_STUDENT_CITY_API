@@ -19,6 +19,19 @@ class AdminUserApiController extends AbstractController
         $user = $em->getRepository(User::class)->find($id);
         if (!$user) return $this->json(['success' => false, 'message' => 'Utilisateur non trouvé'], 404);
         $user->setStatus('validé');
+        $user->setRoles(['ROLE_USER']);
+        $em->flush();
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/api/admin/users/{id}/revoke', name: 'api_admin_user_revoke', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function revoke(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $em->getRepository(User::class)->find($id);
+        if (!$user) return $this->json(['success' => false, 'message' => 'Utilisateur non trouvé'], 404);
+        $user->setStatus('en attente');
+        $user->setRoles([]);
         $em->flush();
         return $this->json(['success' => true]);
     }

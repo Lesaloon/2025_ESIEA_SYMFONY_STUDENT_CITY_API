@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="h4 mt-3 mb-3">Gestion des utilisateurs</h1>
+    
+    <div id="flash-messages"></div>
+
+    {% if not is_granted('ROLE_ADMIN') %}
+        <div class="alert alert-warning">
+            Vous devez être administrateur pour gérer les utilisateurs.
+        </div>
+    {% else %}
+        <div class="card shadow">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Pseudo</th>
+                            <th>Email</th>
+                            <th>Rôles</th>
+                            <th>Statut</th>
+                            <th>Date de création</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        <tr id="user-{{ user.id }}">
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.pseudo }}</td>
+                            <td>{{ user.email }}</td>
+                            <td class="roles">{{ user.roles|join(', ') }}</td>
+                            <td>
+                                <span class="status badge {% if user.status == 'validé' %}bg-success{% elseif user.status == 'en attente' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ user.status }}
+                                </span>
+                            </td>
+                            <td>{{ user.createAt ? user.createAt|date('d/m/Y') : '' }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    {% if user.status != 'validé' %}
+                                        <button onclick="validateUser({{ user.id }})" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Approuver
+                                        </button>
+                                    {% endif %}
+                                    {% if user.status != 'en attente' %}
+                                        <button onclick="revokeUser({{ user.id }})" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-times"></i> Révoquer
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Aucun utilisateur trouvé.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function showFlashMessage(message, type = 'success') {
+    const flashDiv = document.getElementById('flash-messages');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    flashDiv.appendChild(alert);
+    setTimeout(() => alert.remove(), 5000);
+}
+
+function updateUserRow(userId, status) {
+    const row = document.getElementById(`user-${userId}`);
+    const statusBadge = row.querySelector('.status');
+    const actionsCell = row.querySelector('td:last-child');
+
+    // Mettre à jour le statut
+    statusBadge.className = `status badge ${status === 'validé' ? 'bg-success' : 'bg-warning text-dark'}`;
+    statusBadge.textContent = status;
+
+    // Mettre à jour les boutons d'action
+    let buttonsHtml = '<div class="btn-group">';
+    if (status !== 'validé') {
+        buttonsHtml += `<button onclick="validateUser(${userId})" class="btn btn-sm btn-success">
+            <i class="fas fa-check"></i> Approuver
+        </button>`;
+    }
+    if (status !== 'en attente') {
+        buttonsHtml += `<button onclick="revokeUser(${userId})" class="btn btn-sm btn-danger">
+            <i class="fas fa-times"></i> Révoquer
+        </button>`;
+    }
+    buttonsHtml += '</div>';
+    actionsCell.innerHTML = buttonsHtml;
+}
+
+async function validateUser(userId) {
+    try {
+        const response = await fetch(`/api/admin/users/${userId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            updateUserRow(userId, 'validé');
+            showFlashMessage('Utilisateur validé avec succès');
+        } else {
+            throw new Error(data.message || 'Erreur lors de la validation');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showFlashMessage(error.message, 'danger');
+    }
+}
+
+async function revokeUser(userId) {
+    try {
+        const response = await fetch(`/api/admin/users/${userId}/revoke`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            updateUserRow(userId, 'en attente');
+            showFlashMessage('Utilisateur révoqué avec succès');
+        } else {
+            throw new Error(data.message || 'Erreur lors de la révocation');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showFlashMessage(error.message, 'danger');
+    }
+}
+</script>
+{% endblock %} 
