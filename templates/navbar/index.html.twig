@@ -10,6 +10,7 @@
             {% set reviews_path = path('reviews', {}, false) %}
             {% set admin_users_path = path('admin_users', {}, false) %}
             {% set admin_places_path = path('admin_places', {}, false) %}
+            {% set admin_reviews_path = path('admin_reviews', {}, false) %}
 
             <li class="nav-item mb-2">
                 <a href="{{ profile_path }}" class="nav-link {% if app.request.get('_route') == 'profile' %}active bg-light text-dark rounded{% else %}text-dark{% endif %}">
@@ -29,6 +30,12 @@
                     <a href="{{ admin_places_path }}" class="nav-link {% if app.request.get('_route') == 'admin_places' %}active bg-light text-dark rounded{% else %}text-dark{% endif %}">
                         <i class="fas fa-building me-2"></i>
                         Gestion des établissements
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ admin_reviews_path }}" class="nav-link {% if app.request.get('_route') == 'admin_reviews' %}active bg-light text-dark rounded{% else %}text-dark{% endif %}">
+                        <i class="fas fa-star me-2"></i>
+                        Gestion des avis
                     </a>
                 </li>
             {% else %}
