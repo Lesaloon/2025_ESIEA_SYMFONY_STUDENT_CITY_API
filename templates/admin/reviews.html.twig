@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des avis{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="h4 mb-3">Avis & Notations</h1>
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Établissement</th>
+                        <th>Note</th>
+                        <th>Commentaire</th>
+                        <th>Auteur</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for review in reviews %}
+                    <tr>
+                        <td>{{ review.place.name }}</td>
+                        <td>{{ review.rating }} ★</td>
+                        <td>{{ review.commentaire|length > 40 ? review.commentaire|slice(0,40) ~ '...' : review.commentaire }}</td>
+                        <td>{{ review.user.pseudo }}</td>
+                        <td>{{ review.createAt ? review.createAt|date('d M Y') : '' }}</td>
+                        <td>
+                            {% if review.statut == 'approuvé' %}
+                                <span class="badge bg-success">Approuvé</span>
+                            {% elseif review.statut == 'refusé' %}
+                                <span class="badge bg-danger">Refusé</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">En attente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if review.statut == 'en attente' %}
+                                <form method="post" action="/api/admin/reviews/{{ review.id }}/approve" style="display:inline-block" onsubmit="return confirm('Approuver cet avis ?');">
+                                    <button class="btn btn-sm btn-success">Approuver</button>
+                                </form>
+                                <form method="post" action="/api/admin/reviews/{{ review.id }}/reject" style="display:inline-block" onsubmit="return confirm('Refuser cet avis ?');">
+                                    <button class="btn btn-sm btn-warning">Refuser</button>
+                                </form>
+                            {% endif %}
+                            <form method="post" action="/api/admin/reviews/{{ review.id }}" style="display:inline-block" onsubmit="return confirm('Supprimer cet avis ?');">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="7" class="text-center text-muted">Aucun avis</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

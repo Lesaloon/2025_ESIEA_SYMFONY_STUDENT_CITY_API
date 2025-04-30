@@ -47,7 +47,7 @@ class ReviewApiController extends AbstractController
         }
 
         $place = $em->getRepository(Place::class)->find($data['place_id']);
-        if (!$place || $place->getStatut() !== 'Validé') {
+        if (!$place || strtolower($place->getStatut()) !== 'validé') {
             return $this->json(['success' => false, 'message' => 'Établissement non trouvé ou non validé'], 404);
         }
 
@@ -66,6 +66,7 @@ class ReviewApiController extends AbstractController
         $review->setCommentaire($data['commentaire']);
         $review->setRating((int)$data['rating']);
         $review->setCreateAt(new \DateTimeImmutable());
+        $review->setStatut('en attente');
 
         $em->persist($review);
         $em->flush();

@@ -1,16 +1,16 @@
 {% extends 'layouts/with_navbar.html.twig' %}
 
-{% block title %}Gestion des utilisateurs{% endblock %}
+{% block title %}Gestion des établissements{% endblock %}
 
 {% block main_content %}
 <div class="container">
-    <h1 class="h4 mt-3 mb-3">Gestion des utilisateurs</h1>
+    <h1 class="h4 mt-3 mb-3">Gestion des établissements</h1>
     
     <div id="flash-messages"></div>
 
     {% if not is_granted('ROLE_ADMIN') %}
         <div class="alert alert-warning">
-            Vous devez être administrateur pour gérer les utilisateurs.
+            Vous devez être administrateur pour gérer les établissements.
         </div>
     {% else %}
         <div class="card shadow">
@@ -19,36 +19,36 @@
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
-                            <th>Pseudo</th>
-                            <th>Email</th>
-                            <th>Rôles</th>
+                            <th>Nom</th>
+                            <th>Adresse</th>
+                            <th>Type</th>
                             <th>Statut</th>
                             <th>Date de création</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for user in users %}
-                        <tr id="user-{{ user.id }}">
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.pseudo }}</td>
-                            <td>{{ user.email }}</td>
-                            <td class="roles">{{ user.roles|join(', ') }}</td>
+                    {% for place in places %}
+                        <tr id="place-{{ place.id }}">
+                            <td>{{ place.id }}</td>
+                            <td>{{ place.name }}</td>
+                            <td>{{ place.adresse }}</td>
+                            <td>{{ place.type }}</td>
                             <td>
-                                <span class="status badge {% if user.status == 'validé' %}bg-success{% elseif user.status == 'en attente' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
-                                    {{ user.status }}
+                                <span class="status badge {% if place.statut == 'validé' %}bg-success{% elseif place.statut == 'en attente' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ place.statut }}
                                 </span>
                             </td>
-                            <td>{{ user.createAt ? user.createAt|date('d/m/Y') : '' }}</td>
+                            <td>{{ place.createAt ? place.createAt|date('d/m/Y') : '' }}</td>
                             <td>
                                 <div class="btn-group">
-                                    {% if user.status != 'validé' %}
-                                        <button onclick="validateUser({{ user.id }})" class="btn btn-sm btn-success">
+                                    {% if place.statut != 'validé' %}
+                                        <button onclick="validatePlace({{ place.id }})" class="btn btn-sm btn-success">
                                             <i class="fas fa-check"></i> Approuver
                                         </button>
                                     {% endif %}
-                                    {% if user.status != 'en attente' %}
-                                        <button onclick="revokeUser({{ user.id }})" class="btn btn-sm btn-danger">
+                                    {% if place.statut != 'en attente' %}
+                                        <button onclick="revokePlace({{ place.id }})" class="btn btn-sm btn-danger">
                                             <i class="fas fa-times"></i> Révoquer
                                         </button>
                                     {% endif %}
@@ -57,7 +57,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted">Aucun utilisateur trouvé.</td>
+                            <td colspan="7" class="text-center text-muted">Aucun établissement trouvé.</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -80,8 +80,8 @@ function showFlashMessage(message, type = 'success') {
     setTimeout(() => alert.remove(), 5000);
 }
 
-function updateUserRow(userId, status) {
-    const row = document.getElementById(`user-${userId}`);
+function updatePlaceRow(placeId, status) {
+    const row = document.getElementById(`place-${placeId}`);
     const statusBadge = row.querySelector('.status');
     const actionsCell = row.querySelector('td:last-child');
 
@@ -92,12 +92,12 @@ function updateUserRow(userId, status) {
     // Mettre à jour les boutons d'action
     let buttonsHtml = '<div class="btn-group">';
     if (status !== 'validé') {
-        buttonsHtml += `<button onclick="validateUser(${userId})" class="btn btn-sm btn-success">
+        buttonsHtml += `<button onclick="validatePlace(${placeId})" class="btn btn-sm btn-success">
             <i class="fas fa-check"></i> Approuver
         </button>`;
     }
     if (status !== 'en attente') {
-        buttonsHtml += `<button onclick="revokeUser(${userId})" class="btn btn-sm btn-danger">
+        buttonsHtml += `<button onclick="revokePlace(${placeId})" class="btn btn-sm btn-danger">
             <i class="fas fa-times"></i> Révoquer
         </button>`;
     }
@@ -105,9 +105,9 @@ function updateUserRow(userId, status) {
     actionsCell.innerHTML = buttonsHtml;
 }
 
-async function validateUser(userId) {
+async function validatePlace(placeId) {
     try {
-        const response = await fetch(`/api/admin/users/${userId}/approve`, {
+        const response = await fetch(`/api/admin/places/${placeId}/approve`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -118,8 +118,8 @@ async function validateUser(userId) {
         const data = await response.json();
         
         if (response.ok) {
-            updateUserRow(userId, 'validé');
-            showFlashMessage('Utilisateur validé avec succès');
+            updatePlaceRow(placeId, 'validé');
+            showFlashMessage('Établissement validé avec succès');
         } else {
             throw new Error(data.message || 'Erreur lors de la validation');
         }
@@ -129,9 +129,9 @@ async function validateUser(userId) {
     }
 }
 
-async function revokeUser(userId) {
+async function revokePlace(placeId) {
     try {
-        const response = await fetch(`/api/admin/users/${userId}/revoke`, {
+        const response = await fetch(`/api/admin/places/${placeId}/revoke`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -142,8 +142,8 @@ async function revokeUser(userId) {
         const data = await response.json();
         
         if (response.ok) {
-            updateUserRow(userId, 'en attente');
-            showFlashMessage('Utilisateur révoqué avec succès');
+            updatePlaceRow(placeId, 'en attente');
+            showFlashMessage('Établissement révoqué avec succès');
         } else {
             throw new Error(data.message || 'Erreur lors de la révocation');
         }

@@ -30,6 +30,9 @@ class Review
     #[ORM\JoinColumn(nullable: false)]
     private ?Place $place = null;
 
+    #[ORM\Column(type: 'string', length: 20, options: ['default' => 'en attente'])]
+    private ?string $statut = 'en attente';
+
     public function getId(): ?int
     {
         return $this->id;
@@ -95,4 +98,14 @@ class Review
         return $this;
     }
     
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
+        return $this;
+    }
 }
