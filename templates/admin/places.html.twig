@@ -3,71 +3,153 @@
 {% block title %}Gestion des établissements{% endblock %}
 
 {% block main_content %}
-<div class="container">
-    <h1 class="h4 mt-3 mb-3">Gestion des établissements</h1>
-    
-    <div id="flash-messages"></div>
-
-    {% if not is_granted('ROLE_ADMIN') %}
-        <div class="alert alert-warning">
-            Vous devez être administrateur pour gérer les établissements.
-        </div>
-    {% else %}
-        <div class="card shadow">
-            <div class="card-body p-0">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Nom</th>
-                            <th>Adresse</th>
-                            <th>Type</th>
-                            <th>Statut</th>
-                            <th>Date de création</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for place in places %}
-                        <tr id="place-{{ place.id }}">
-                            <td>{{ place.id }}</td>
-                            <td>{{ place.name }}</td>
-                            <td>{{ place.adresse }}</td>
-                            <td>{{ place.type }}</td>
-                            <td>
-                                <span class="status badge {% if place.statut == 'validé' %}bg-success{% elseif place.statut == 'en attente' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
-                                    {{ place.statut }}
-                                </span>
-                            </td>
-                            <td>{{ place.createAt ? place.createAt|date('d/m/Y') : '' }}</td>
-                            <td>
-                                <div class="btn-group">
-                                    {% if place.statut != 'validé' %}
-                                        <button onclick="validatePlace({{ place.id }})" class="btn btn-sm btn-success">
-                                            <i class="fas fa-check"></i> Approuver
-                                        </button>
-                                    {% endif %}
-                                    {% if place.statut != 'en attente' %}
-                                        <button onclick="revokePlace({{ place.id }})" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-times"></i> Révoquer
-                                        </button>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="7" class="text-center text-muted">Aucun établissement trouvé.</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="h4 mb-0">Gestion des établissements</h1>
             </div>
+            
+            <div id="flash-messages"></div>
+
+            {% if not is_granted('ROLE_ADMIN') %}
+                <div class="alert alert-warning">
+                    Vous devez être administrateur pour gérer les établissements.
+                </div>
+            {% else %}
+                <div class="d-flex gap-2 mb-3">
+                    <input type="text" class="form-control w-auto" id="filter-name" placeholder="Nom...">
+                    <select class="form-select w-auto" id="filter-type">
+                        <option value="">Type de lieu</option>
+                        <option value="Restaurant">Restaurant</option>
+                        <option value="Café">Café</option>
+                        <option value="Bibliothèque">Bibliothèque</option>
+                    </select>
+                    <select class="form-select w-auto" id="filter-status">
+                        <option value="">Statut</option>
+                        <option value="en attente">En attente</option>
+                        <option value="validé">Validé</option>
+                        <option value="refusé">Refusé</option>
+                    </select>
+                    <select class="form-select w-auto" id="sort-by">
+                        <option value="createAt">Date de création</option>
+                        <option value="name">Nom</option>
+                        <option value="type">Type</option>
+                    </select>
+                    <select class="form-select w-auto" id="sort-order">
+                        <option value="DESC">Décroissant</option>
+                        <option value="ASC">Croissant</option>
+                    </select>
+                </div>
+
+                <div class="card shadow">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nom</th>
+                                    <th>Adresse</th>
+                                    <th>Type</th>
+                                    <th>Statut</th>
+                                    <th>Date de création</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="places-tbody">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Chargement...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
         </div>
-    {% endif %}
+    </div>
 </div>
 
 <script>
+let allPlaces = [];
+let tbody, filterName, filterType, filterStatus, sortBy, sortOrder;
+
+// Charger les établissements
+function loadPlaces() {
+    const params = new URLSearchParams();
+    if (filterName.value) params.append('name', filterName.value);
+    if (filterType.value) params.append('type', filterType.value);
+    if (filterStatus.value) params.append('status', filterStatus.value);
+    params.append('sort_by', sortBy.value);
+    params.append('sort_order', sortOrder.value);
+
+    fetch(`/api/admin/places?${params}`, {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+    })
+    .then(response => response.json())
+    .then(data => {
+        allPlaces = data;
+        renderPlaces(data);
+    });
+}
+
+// Afficher les établissements
+function renderPlaces(places) {
+    tbody.innerHTML = '';
+    if (places.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Aucun établissement trouvé.</td></tr>';
+    } else {
+        places.forEach(place => {
+            tbody.innerHTML += `
+                <tr id="place-${place.id}">
+                    <td>${place.id}</td>
+                    <td>${place.name}</td>
+                    <td>${place.adresse}</td>
+                    <td>${place.type}</td>
+                    <td>
+                        <span class="status badge ${place.statut === 'validé' ? 'bg-success' : (place.statut === 'en attente' ? 'bg-warning text-dark' : 'bg-secondary')}">
+                            ${place.statut}
+                        </span>
+                    </td>
+                    <td>${new Date(place.createAt).toLocaleDateString()}</td>
+                    <td>
+                        <div class="btn-group">
+                            ${place.statut !== 'validé' ? `
+                                <button onclick="validatePlace(${place.id})" class="btn btn-sm btn-success">
+                                    <i class="fas fa-check"></i> Approuver
+                                </button>
+                            ` : ''}
+                            ${place.statut !== 'en attente' ? `
+                                <button onclick="revokePlace(${place.id})" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-times"></i> Révoquer
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    tbody = document.getElementById('places-tbody');
+    filterName = document.getElementById('filter-name');
+    filterType = document.getElementById('filter-type');
+    filterStatus = document.getElementById('filter-status');
+    sortBy = document.getElementById('sort-by');
+    sortOrder = document.getElementById('sort-order');
+
+    // Écouteurs d'événements pour les filtres
+    filterName.addEventListener('input', loadPlaces);
+    filterType.addEventListener('change', loadPlaces);
+    filterStatus.addEventListener('change', loadPlaces);
+    sortBy.addEventListener('change', loadPlaces);
+    sortOrder.addEventListener('change', loadPlaces);
+
+    // Charger les données initiales
+    loadPlaces();
+});
+
 function showFlashMessage(message, type = 'success') {
     const flashDiv = document.getElementById('flash-messages');
     const alert = document.createElement('div');
@@ -78,31 +160,6 @@ function showFlashMessage(message, type = 'success') {
     `;
     flashDiv.appendChild(alert);
     setTimeout(() => alert.remove(), 5000);
-}
-
-function updatePlaceRow(placeId, status) {
-    const row = document.getElementById(`place-${placeId}`);
-    const statusBadge = row.querySelector('.status');
-    const actionsCell = row.querySelector('td:last-child');
-
-    // Mettre à jour le statut
-    statusBadge.className = `status badge ${status === 'validé' ? 'bg-success' : 'bg-warning text-dark'}`;
-    statusBadge.textContent = status;
-
-    // Mettre à jour les boutons d'action
-    let buttonsHtml = '<div class="btn-group">';
-    if (status !== 'validé') {
-        buttonsHtml += `<button onclick="validatePlace(${placeId})" class="btn btn-sm btn-success">
-            <i class="fas fa-check"></i> Approuver
-        </button>`;
-    }
-    if (status !== 'en attente') {
-        buttonsHtml += `<button onclick="revokePlace(${placeId})" class="btn btn-sm btn-danger">
-            <i class="fas fa-times"></i> Révoquer
-        </button>`;
-    }
-    buttonsHtml += '</div>';
-    actionsCell.innerHTML = buttonsHtml;
 }
 
 async function validatePlace(placeId) {
@@ -118,7 +175,7 @@ async function validatePlace(placeId) {
         const data = await response.json();
         
         if (response.ok) {
-            updatePlaceRow(placeId, 'validé');
+            loadPlaces();
             showFlashMessage('Établissement validé avec succès');
         } else {
             throw new Error(data.message || 'Erreur lors de la validation');
@@ -142,7 +199,7 @@ async function revokePlace(placeId) {
         const data = await response.json();
         
         if (response.ok) {
-            updatePlaceRow(placeId, 'en attente');
+            loadPlaces();
             showFlashMessage('Établissement révoqué avec succès');
         } else {
             throw new Error(data.message || 'Erreur lors de la révocation');

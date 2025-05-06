@@ -30,13 +30,15 @@
                                 <th>Type</th>
                                 <th>Adresse</th>
                                 <th>Description</th>
+                                <th>Note moyenne</th>
+                                <th>Nombre d'avis</th>
                                 <th>Date de création</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="places-tbody">
                             <tr>
-                                <td colspan="6" class="text-center text-muted">Chargement...</td>
+                                <td colspan="8" class="text-center text-muted">Chargement...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -94,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderPlaces(places) {
         tbody.innerHTML = '';
         if (places.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Aucun établissement validé pour le moment.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Aucun établissement validé pour le moment.</td></tr>';
         } else {
             places.forEach(place => {
                 const alreadyReviewed = userReviews.some(r => r.place.id == place.id);
@@ -104,6 +106,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td>${place.type}</td>
                         <td>${place.adresse}</td>
                         <td>${place.description.length > 40 ? place.description.substring(0, 40) + '...' : place.description}</td>
+                        <td>
+                            <span class="text-warning">${'★'.repeat(Math.round(place.averageRating))}${'☆'.repeat(5 - Math.round(place.averageRating))}</span>
+                            <span class="ms-1">${place.averageRating.toFixed(1)}</span>
+                        </td>
+                        <td>${place.reviewCount}</td>
                         <td>${place.createAt ? new Date(place.createAt).toLocaleDateString() : ''}</td>
                         <td>
                             ${alreadyReviewed

@@ -25,8 +25,8 @@ class AuthController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
-            $user->setRoles(['ROLE_USER']);
-            $user->setStatus('pending');
+            $user->setRoles([]);
+            $user->setStatus('en attente');
             $user->setCreateAt(new \DateTimeImmutable());
 
             $em->persist($user);

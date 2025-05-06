@@ -68,6 +68,8 @@ class PlaceApiController extends AbstractController
                 'adresse' => $place->getAdresse(),
                 'description' => $place->getDescription(),
                 'createAt' => $place->getCreateAt()?->format('Y-m-d H:i:s'),
+                'averageRating' => $place->getAverageRating(),
+                'reviewCount' => $place->getReviewCount(),
             ];
         }
         return $this->json($data);
@@ -89,5 +91,55 @@ class PlaceApiController extends AbstractController
             'description' => $place->getDescription(),
             'createAt' => $place->getCreateAt()?->format('Y-m-d H:i:s'),
         ]);
+    }
+
+    #[Route('/api/admin/places', name: 'api_admin_places_list', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function adminList(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $queryBuilder = $em->createQueryBuilder()
+            ->select('p', 'u')
+            ->from(Place::class, 'p')
+            ->leftJoin('p.user', 'u');
+
+        // Filtres
+        if ($name = $request->query->get('name')) {
+            $queryBuilder->andWhere('p.name LIKE :name')
+                ->setParameter('name', '%' . $name . '%');
+        }
+        if ($type = $request->query->get('type')) {
+            $queryBuilder->andWhere('p.type = :type')
+                ->setParameter('type', $type);
+        }
+        if ($status = $request->query->get('status')) {
+            $queryBuilder->andWhere('p.statut = :status')
+                ->setParameter('status', $status);
+        }
+
+        // Tri
+        $sortBy = $request->query->get('sort_by', 'createAt');
+        $sortOrder = $request->query->get('sort_order', 'DESC');
+        $queryBuilder->orderBy('p.' . $sortBy, $sortOrder);
+
+        $places = $queryBuilder->getQuery()->getResult();
+
+        $data = [];
+        foreach ($places as $place) {
+            $data[] = [
+                'id' => $place->getId(),
+                'name' => $place->getName(),
+                'type' => $place->getType(),
+                'adresse' => $place->getAdresse(),
+                'description' => $place->getDescription(),
+                'statut' => $place->getStatut(),
+                'createAt' => $place->getCreateAt()?->format('Y-m-d H:i:s'),
+                'user' => [
+                    'id' => $place->getUser()->getId(),
+                    'pseudo' => $place->getUser()->getPseudo(),
+                ]
+            ];
+        }
+
+        return $this->json($data);
     }
 } 

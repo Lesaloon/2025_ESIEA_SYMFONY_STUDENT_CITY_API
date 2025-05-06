@@ -35,5 +35,32 @@ class AdminUserApiController extends AbstractController
         $em->flush();
         return $this->json(['success' => true]);
     }
-    // ... autres actions : reject, update role, revoke ...
+
+    #[Route('/api/admin/users/{id}/delete', name: 'api_admin_user_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function delete(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        try {
+            $user = $em->getRepository(User::class)->find($id);
+            if (!$user) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Utilisateur non trouvé'
+                ], 404);
+            }
+            
+            $em->remove($user);
+            $em->flush();
+            
+            return $this->json([
+                'success' => true,
+                'message' => 'Utilisateur supprimé avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de la suppression'
+            ], 500);
+        }
+    }
 }

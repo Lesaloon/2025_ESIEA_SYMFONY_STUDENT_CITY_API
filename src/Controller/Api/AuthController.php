@@ -48,6 +48,10 @@ class AuthController extends AbstractController
             return new JsonResponse(['error' => 'Invalid email or password.'], 401);
         }
 
+        if (empty($user->getRoles())) {
+            return new JsonResponse(['error' => 'Votre compte n\'est pas encore validé par un administrateur.'], 403);
+        }
+
         // Générer un token JWT
         $token = $jwtManager->create($user);
 
@@ -80,8 +84,8 @@ class AuthController extends AbstractController
 
         // Hashage du mot de passe
         $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
-        $user->setRoles(['ROLE_USER']);
-        $user->setStatus('pending');
+        $user->setRoles([]);
+        $user->setStatus('en attente'); 
         $user->setCreateAt(new \DateTimeImmutable());
 
         $this->entityManager->persist($user);

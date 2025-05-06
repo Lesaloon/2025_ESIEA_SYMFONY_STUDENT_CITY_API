@@ -15,6 +15,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 
 class UserAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -33,7 +34,15 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
 
         return new Passport(
-            new UserBadge($email),
+            new UserBadge($email, function($user) {
+                if ($user) {
+                    $roles = $user->getRoles();
+                    if (!in_array('ROLE_USER', $roles) && !in_array('ROLE_ADMIN', $roles)) {
+                        throw new CustomUserMessageAuthenticationException('Votre compte n\'est pas encore validé par un administrateur.');
+                    }
+                }
+                return $user;
+            }),
             new PasswordCredentials($request->getPayload()->getString('password')),
             [
                 new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_csrf_token')),

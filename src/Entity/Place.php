@@ -134,4 +134,28 @@ class Place
         return $this;
     }
     
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    public function getAverageRating(): float
+    {
+        $reviews = $this->getReviews();
+        if ($reviews->isEmpty()) {
+            return 0;
+        }
+
+        $total = 0;
+        foreach ($reviews as $review) {
+            $total += $review->getRating();
+        }
+
+        return round($total / $reviews->count(), 1);
+    }
+
+    public function getReviewCount(): int
+    {
+        return $this->getReviews()->count();
+    }
 }
