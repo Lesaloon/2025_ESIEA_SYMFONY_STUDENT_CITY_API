@@ -8,6 +8,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class PlaceType extends AbstractType
@@ -32,6 +33,22 @@ class PlaceType extends AbstractType
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
+            ])
+            ->add('latitude', NumberType::class, [
+                'label' => 'Latitude',
+                'required' => false,
+                'scale' => 6,
+                'attr' => [
+                    'step' => 'any',
+                ],
+            ])
+            ->add('longitude', NumberType::class, [
+                'label' => 'Longitude',
+                'required' => false,
+                'scale' => 6,
+                'attr' => [
+                    'step' => 'any',
+                ],
             ])
         ;
     }

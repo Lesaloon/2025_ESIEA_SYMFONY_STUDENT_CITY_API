@@ -50,6 +50,8 @@ class PlaceApiController extends AbstractController
                 'description' => $place->getDescription(),
                 'statut' => $place->getStatut(),
                 'createAt' => $place->getCreateAt()->format('Y-m-d H:i:s'),
+                'latitude' => $place->getLatitude(),
+                'longitude' => $place->getLongitude(),
             ]
         ], 201);
     }
@@ -70,6 +72,8 @@ class PlaceApiController extends AbstractController
                 'createAt' => $place->getCreateAt()?->format('Y-m-d H:i:s'),
                 'averageRating' => $place->getAverageRating(),
                 'reviewCount' => $place->getReviewCount(),
+                'latitude' => $place->getLatitude(),
+                'longitude' => $place->getLongitude(),
             ];
         }
         return $this->json($data);
@@ -90,6 +94,8 @@ class PlaceApiController extends AbstractController
             'adresse' => $place->getAdresse(),
             'description' => $place->getDescription(),
             'createAt' => $place->getCreateAt()?->format('Y-m-d H:i:s'),
+            'latitude' => $place->getLatitude(),
+            'longitude' => $place->getLongitude(),
         ]);
     }
 
@@ -133,6 +139,8 @@ class PlaceApiController extends AbstractController
                 'description' => $place->getDescription(),
                 'statut' => $place->getStatut(),
                 'createAt' => $place->getCreateAt()?->format('Y-m-d H:i:s'),
+                'latitude' => $place->getLatitude(),
+                'longitude' => $place->getLongitude(),
                 'user' => [
                     'id' => $place->getUser()->getId(),
                     'pseudo' => $place->getUser()->getPseudo(),

@@ -40,6 +40,12 @@ class Place
     #[ORM\OneToMany(mappedBy: 'place', targetEntity: Review::class)]
     private Collection $reviews;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $latitude = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $longitude = null;
+
     public function __construct()
     {
         $this->reviews = new ArrayCollection();
@@ -157,5 +163,27 @@ class Place
     public function getReviewCount(): int
     {
         return $this->getReviews()->count();
+    }
+
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?float $latitude): static
+    {
+        $this->latitude = $latitude;
+        return $this;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?float $longitude): static
+    {
+        $this->longitude = $longitude;
+        return $this;
     }
 }
