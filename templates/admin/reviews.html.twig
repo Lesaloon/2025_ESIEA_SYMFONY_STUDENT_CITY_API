@@ -41,14 +41,6 @@
                         </td>
                         <td>
                             <div class="btn-group">
-                                {% if review.statut == 'en attente' %}
-                                    <button onclick="approveReview({{ review.id }})" class="btn btn-sm btn-success">
-                                        <i class="fas fa-check"></i> Approuver
-                                    </button>
-                                    <button onclick="rejectReview({{ review.id }})" class="btn btn-sm btn-warning">
-                                        <i class="fas fa-times"></i> Refuser
-                                    </button>
-                                {% endif %}
                                 <button onclick="deleteReview({{ review.id }})" class="btn btn-sm btn-danger">
                                     <i class="fas fa-trash"></i> Supprimer
                                 </button>

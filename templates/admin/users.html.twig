@@ -22,6 +22,7 @@
                             <th>Pseudo</th>
                             <th>Email</th>
                             <th>Rôles</th>
+                            <th>Modifier les rôles</th>
                             <th>Statut</th>
                             <th>Date de création</th>
                             <th>Actions</th>
@@ -33,7 +34,20 @@
                             <td>{{ user.id }}</td>
                             <td>{{ user.pseudo }}</td>
                             <td>{{ user.email }}</td>
-                            <td class="roles">{{ user.roles|join(', ') }}</td>
+                            <td>{{ user.roles|join(', ') }}</td>
+                            <td>
+                                <form class="role-form d-inline" data-user-id="{{ user.id }}">
+                                    <label class="me-2">
+                                        <input type="checkbox" name="roles[]" value="ROLE_USER" {% if 'ROLE_USER' in user.roles %}checked{% endif %}>
+                                        Utilisateur
+                                    </label>
+                                    <label class="me-2">
+                                        <input type="checkbox" name="roles[]" value="ROLE_ADMIN" {% if 'ROLE_ADMIN' in user.roles %}checked{% endif %}>
+                                        Admin
+                                    </label>
+                                    <button type="submit" class="btn btn-sm btn-primary">Sauvegarder</button>
+                                </form>
+                            </td>
                             <td>
                                 <span class="status badge {% if user.status == 'validé' %}bg-success{% elseif user.status == 'en attente' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                                     {{ user.status }}
@@ -60,7 +74,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted">Aucun utilisateur trouvé.</td>
+                            <td colspan="8" class="text-center text-muted">Aucun utilisateur trouvé.</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -198,5 +212,29 @@ async function deleteUser(userId) {
         showFlashMessage(error.message || 'Une erreur est survenue lors de la suppression', 'danger');
     }
 }
+
+document.querySelectorAll('.role-form').forEach(form => {
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const userId = form.getAttribute('data-user-id');
+        const checkedRoles = Array.from(form.querySelectorAll('input[name="roles[]"]:checked')).map(cb => cb.value);
+
+        const response = await fetch(`/api/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            },
+            body: JSON.stringify({ roles: checkedRoles })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert('Rôles mis à jour !');
+        } else {
+            alert('Erreur : ' + (data.message || 'Inconnue'));
+        }
+    });
+});
 </script>
 {% endblock %} 

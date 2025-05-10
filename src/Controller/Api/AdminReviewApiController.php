@@ -23,25 +23,28 @@ class AdminReviewApiController extends AbstractController
         return $this->json(['success' => true]);
     }
 
-    #[Route('/api/admin/reviews/{id}/approve', name: 'api_admin_review_approve', methods: ['PATCH'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function approve(int $id, EntityManagerInterface $em): JsonResponse
+    #[Route('/api/reviews/', name: 'api_reviews_all', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function all(EntityManagerInterface $em): JsonResponse
     {
-        $review = $em->getRepository(Review::class)->find($id);
-        if (!$review) return $this->json(['success' => false, 'message' => 'Avis non trouvé'], 404);
-        $review->setStatut('approuvé');
-        $em->flush();
-        return $this->json(['success' => true, 'message' => 'Avis approuvé']);
-    }
-
-    #[Route('/api/admin/reviews/{id}/reject', name: 'api_admin_review_reject', methods: ['PATCH'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function reject(int $id, EntityManagerInterface $em): JsonResponse
-    {
-        $review = $em->getRepository(Review::class)->find($id);
-        if (!$review) return $this->json(['success' => false, 'message' => 'Avis non trouvé'], 404);
-        $review->setStatut('refusé');
-        $em->flush();
-        return $this->json(['success' => true, 'message' => 'Avis refusé']);
+        $reviews = $em->getRepository(Review::class)->findAll();
+        $data = [];
+        foreach ($reviews as $review) {
+            $data[] = [
+                'id' => $review->getId(),
+                'place' => [
+                    'id' => $review->getPlace()->getId(),
+                    'name' => $review->getPlace()->getName(),
+                ],
+                'user' => [
+                    'id' => $review->getUser()->getId(),
+                    'pseudo' => $review->getUser()->getPseudo(),
+                ],
+                'commentaire' => $review->getCommentaire(),
+                'rating' => $review->getRating(),
+                'createAt' => $review->getCreateAt()?->format('Y-m-d H:i:s'),
+            ];
+        }
+        return $this->json($data);
     }
 }
