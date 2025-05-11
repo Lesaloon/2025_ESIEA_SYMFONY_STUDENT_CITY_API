@@ -56,233 +56,174 @@ symfony server:start
 
 ## Utilisation de l'API avec Postman
 
-### Configuration de l'environnement Postman
-1. Créez un nouvel environnement dans Postman
-2. Ajoutez les variables suivantes :
-   - `base_url`: http://localhost:8000
+### Configuration de l'environnement
 
-### Authentification
+1. Créez un nouvel environnement dans Postman avec les variables suivantes :
+   - `base_url` : http://localhost:8000
+   - `token` : (sera automatiquement rempli après la connexion)
 
-#### Inscription
-- **Méthode**: POST
-- **URL**: {{base_url}}/api/register
-- **Headers**: 
-  - Content-Type: application/json
-- **Body** (raw JSON):
-```json
-{
-    "pseudo": "example",
-    "email": "user@example.com",
-    "password": "password123"
-}
-```
+### Exemples de requêtes
 
-#### Connexion
-- **Méthode**: POST
-- **URL**: {{base_url}}/api/login
-- **Headers**: 
-  - Content-Type: application/json
-- **Body** (raw JSON):
-```json
-{
-    "email": "user@example.com",
-    "password": "password123"
-}
-```
+#### Authentification
 
-### Gestion des Lieux
+1. **Inscription**
+   - Méthode : POST
+   - URL : {{base_url}}/api/register
+   - Headers : 
+     - Content-Type: application/json
+   - Body :
+   ```json
+   {
+       "pseudo": "example",
+       "email": "user@example.com",
+       "password": "password123"
+   }
+   ```
 
-#### Lister tous les lieux
-- **Méthode**: GET
-- **URL**: {{base_url}}/api/places
-- **Headers**: 
-  - Authorization: Bearer {{token}}
+2. **Connexion**
+   - Méthode : POST
+   - URL : {{base_url}}/api/login
+   - Headers : 
+     - Content-Type: application/json
+   - Body :
+   ```json
+   {
+       "email": "user@example.com",
+       "password": "password123"
+   }
+   ```
 
-#### Obtenir un lieu spécifique
-- **Méthode**: GET
-- **URL**: {{base_url}}/api/places/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
+#### Lieux
 
-#### Créer un nouveau lieu
-- **Méthode**: POST
-- **URL**: {{base_url}}/api/places
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-  - Content-Type: application/json
-- **Body** (raw JSON):
-```json
-{
-    "name": "Nom du lieu",
-    "description": "Description du lieu",
-    "address": "Adresse du lieu"
-}
-```
+1. **Lister tous les lieux**
+   - Méthode : GET
+   - URL : {{base_url}}/api/places
+   - Headers : 
+     - Authorization: Bearer {{token}}
 
-#### Modifier un lieu
-- **Méthode**: PUT
-- **URL**: {{base_url}}/api/places/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-  - Content-Type: application/json
-- **Body** (raw JSON):
-```json
-{
-    "name": "Nouveau nom",
-    "description": "Nouvelle description",
-    "address": "Nouvelle adresse"
-}
-```
+2. **Obtenir un lieu**
+   - Méthode : GET
+   - URL : {{base_url}}/api/places/1
+   - Headers : 
+     - Authorization: Bearer {{token}}
 
-#### Supprimer un lieu
-- **Méthode**: DELETE
-- **URL**: {{base_url}}/api/places/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
+3. **Créer un lieu**
+   - Méthode : POST
+   - URL : {{base_url}}/api/places
+   - Headers : 
+     - Authorization: Bearer {{token}}
+     - Content-Type: application/json
+   - Body :
+   ```json
+   {
+       "name": "Nom du lieu",
+       "description": "Description du lieu",
+       "address": "Adresse du lieu"
+   }
+   ```
 
-### Gestion des Avis
+#### Avis
 
-#### Lister tous les avis
-- **Méthode**: GET
-- **URL**: {{base_url}}/api/reviews
-- **Headers**: 
-  - Authorization: Bearer {{token}}
+1. **Lister tous les avis**
+   - Méthode : GET
+   - URL : {{base_url}}/api/reviews
+   - Headers : 
+     - Authorization: Bearer {{token}}
 
-#### Obtenir un avis spécifique
-- **Méthode**: GET
-- **URL**: {{base_url}}/api/reviews/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
+2. **Obtenir un avis**
+   - Méthode : GET
+   - URL : {{base_url}}/api/reviews/1
+   - Headers : 
+     - Authorization: Bearer {{token}}
 
-#### Ajouter un avis
-- **Méthode**: POST
-- **URL**: {{base_url}}/api/reviews
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-  - Content-Type: application/json
-- **Body** (raw JSON):
-```json
-{
-    "place": 1,
-    "rating": 4,
-    "comment": "Excellent endroit !"
-}
-```
+3. **Ajouter un avis**
+   - Méthode : POST
+   - URL : {{base_url}}/api/reviews
+   - Headers : 
+     - Authorization: Bearer {{token}}
+     - Content-Type: application/json
+   - Body :
+   ```json
+   {
+       "place": 1,
+       "rating": 4,
+       "comment": "Excellent endroit !"
+   }
+   ```
 
-#### Modifier un avis
-- **Méthode**: PUT
-- **URL**: {{base_url}}/api/reviews/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-  - Content-Type: application/json
-- **Body** (raw JSON):
-```json
-{
-    "rating": 5,
-    "comment": "Commentaire modifié"
-}
-```
+#### Profil
 
-#### Supprimer un avis
-- **Méthode**: DELETE
-- **URL**: {{base_url}}/api/reviews/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
+1. **Modifier son profil**
+   - Méthode : PUT
+   - URL : {{base_url}}/api/profile
+   - Headers : 
+     - Authorization: Bearer {{token}}
+     - Content-Type: application/json
+   - Body :
+   ```json
+   {
+       "pseudo": "nouveau_pseudo",
+       "email": "nouveau@email.com"
+   }
+   ```
 
-### Gestion du Profil
+#### Administration
 
-#### Obtenir son profil
-- **Méthode**: GET
-- **URL**: {{base_url}}/api/profile
-- **Headers**: 
-  - Authorization: Bearer {{token}}
+1. **Utilisateurs**
+   - Lister tous les utilisateurs
+     - Méthode : GET
+     - URL : {{base_url}}/api/users
+     - Headers : 
+       - Authorization: Bearer {{token}}
 
-#### Modifier son profil
-- **Méthode**: PUT
-- **URL**: {{base_url}}/api/profile
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-  - Content-Type: application/json
-- **Body** (raw JSON):
-```json
-{
-    "pseudo": "nouveau_pseudo",
-    "email": "nouveau@email.com"
-}
-```
+   - Modifier un utilisateur
+     - Méthode : PUT
+     - URL : {{base_url}}/api/users/1
+     - Headers : 
+       - Authorization: Bearer {{token}}
+       - Content-Type: application/json
+     - Body :
+     ```json
+     {
+         "roles": ["ROLE_ADMIN"]
+     }
+     ```
 
-### Administration
+2. **Lieux**
+   - Approuver un lieu
+     - Méthode : POST
+     - URL : {{base_url}}/api/admin/places/1/approve
+     - Headers : 
+       - Authorization: Bearer {{token}}
 
-#### Gestion des Utilisateurs (Admin)
+   - Rejeter un lieu
+     - Méthode : POST
+     - URL : {{base_url}}/api/admin/places/1/revoke
+     - Headers : 
+       - Authorization: Bearer {{token}}
 
-##### Lister tous les utilisateurs
-- **Méthode**: GET
-- **URL**: {{base_url}}/api/admin/users
-- **Headers**: 
-  - Authorization: Bearer {{token}}
+3. **Avis**
+   - Modérer un avis
+     - Méthode : PUT
+     - URL : {{base_url}}/api/admin/reviews/1
+     - Headers : 
+       - Authorization: Bearer {{token}}
+       - Content-Type: application/json
+     - Body :
+     ```json
+     {
+         "status": "approved"
+     }
+     ```
 
-##### Obtenir un utilisateur spécifique
-- **Méthode**: GET
-- **URL**: {{base_url}}/api/admin/users/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
+### Collection Postman
 
-##### Modifier un utilisateur
-- **Méthode**: PUT
-- **URL**: {{base_url}}/api/admin/users/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-  - Content-Type: application/json
-- **Body** (raw JSON):
-```json
-{
-    "roles": ["ROLE_ADMIN"]
-}
-```
-
-##### Supprimer un utilisateur
-- **Méthode**: DELETE
-- **URL**: {{base_url}}/api/admin/users/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-
-#### Gestion des Lieux (Admin)
-
-##### Valider un lieu
-- **Méthode**: PUT
-- **URL**: {{base_url}}/api/admin/places/{id}/validate
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-
-##### Rejeter un lieu
-- **Méthode**: PUT
-- **URL**: {{base_url}}/api/admin/places/{id}/reject
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-
-#### Gestion des Avis (Admin)
-
-##### Modérer un avis
-- **Méthode**: PUT
-- **URL**: {{base_url}}/api/admin/reviews/{id}
-- **Headers**: 
-  - Authorization: Bearer {{token}}
-  - Content-Type: application/json
-- **Body** (raw JSON):
-```json
-{
-    "status": "approved"
-}
-```
-
-## Collection Postman
-
-Une collection Postman complète est disponible dans le fichier `postman_collection.json`. Pour l'utiliser :
+Pour faciliter l'utilisation de l'API, vous pouvez importer la collection Postman fournie dans le projet. Cette collection contient toutes les requêtes nécessaires pour tester l'API.
 
 1. Ouvrez Postman
 2. Cliquez sur "Import"
 3. Sélectionnez le fichier `postman_collection.json`
-4. Sélectionnez l'environnement que vous avez créé
+4. Sélectionnez l'environnement que vous avez créé précédemment
 
 ## Sécurité
 
@@ -290,7 +231,3 @@ Une collection Postman complète est disponible dans le fichier `postman_collect
 - Les mots de passe sont hashés avec bcrypt
 - Les requêtes sont validées et nettoyées
 - Les CORS sont configurés pour la sécurité
-
-## Support
-
-Pour toute question ou problème, veuillez ouvrir une issue sur le repository GitHub du projet.
