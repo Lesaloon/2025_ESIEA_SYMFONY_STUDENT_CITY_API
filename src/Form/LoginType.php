@@ -20,8 +20,8 @@ class LoginType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'csrf_protection' => true, // Active CSRF pour le formulaire web
-            'csrf_token_id' => 'authenticate', // Utilise l'ID de token CSRF spécifié dans la configuration
+            'csrf_protection' => true,
+            'csrf_token_id' => 'authenticate',
         ]);
     }
 }

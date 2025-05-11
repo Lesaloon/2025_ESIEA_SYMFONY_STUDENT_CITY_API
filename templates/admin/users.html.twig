@@ -36,7 +36,7 @@
                             <td>{{ user.email }}</td>
                             <td>{{ user.roles|join(', ') }}</td>
                             <td>
-                                <form class="role-form d-inline" data-user-id="{{ user.id }}">
+                           <form class="role-form d-inline" data-user-id="{{ user.id }}">
                                     <label class="me-2">
                                         <input type="checkbox" name="roles[]" value="ROLE_USER" {% if 'ROLE_USER' in user.roles %}checked{% endif %}>
                                         Utilisateur

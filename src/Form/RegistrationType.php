@@ -26,7 +26,7 @@ class RegistrationType extends AbstractType
         $resolver->setDefaults([
             'data_class' => User::class,
             'csrf_protection' => false,
-            'allow_extra_fields' => true, // ✅ pour ne pas bloquer les champs en trop
+            'allow_extra_fields' => true,
         ]);
     }
 }
