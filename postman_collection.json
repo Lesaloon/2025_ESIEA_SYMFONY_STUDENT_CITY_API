@@ -106,7 +106,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Nom du lieu\",\n    \"description\": \"Description du lieu\",\n    \"address\": \"Adresse du lieu\",\n    \"latitude\": 48.8566,\n    \"longitude\": 2.3522,\n    \"category\": \"restaurant\",\n    \"priceRange\": \"€€\",\n    \"openingHours\": \"9h-18h\",\n    \"website\": \"https://example.com\",\n    \"phone\": \"0123456789\"\n}"
+							"raw": "{\n    \"name\": \"Nom du lieu\",\n    \"description\": \"Description du lieu\",\n    \"address\": \"Adresse du lieu\",\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/places",
@@ -170,7 +170,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"place\": 1,\n    \"rating\": 4,\n    \"comment\": \"Excellent endroit !\",\n    \"title\": \"Super expérience\",\n    \"visitDate\": \"2024-03-20\",\n    \"photos\": [\"url1\", \"url2\"],\n    \"pros\": [\"Ambiance\", \"Service\"],\n    \"cons\": [\"Prix\", \"Attente\"]\n}"
+							"raw": "{\n    \"place\": 1,\n    \"rating\": 4,\n    \"comment\": \"Excellent endroit !\",\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/reviews",
@@ -309,7 +309,7 @@
 						{
 							"name": "Approuver un lieu",
 							"request": {
-								"method": "PUT",
+								"method": "POST",
 								"header": [
 									{
 										"key": "Authorization",
@@ -326,7 +326,7 @@
 						{
 							"name": "Rejeter un lieu",
 							"request": {
-								"method": "PUT",
+								"method": "POST",
 								"header": [
 									{
 										"key": "Authorization",
@@ -334,9 +334,9 @@
 									}
 								],
 								"url": {
-									"raw": "{{base_url}}/api/admin/places/1/reject",
+									"raw": "{{base_url}}/api/admin/places/1/revoke",
 									"host": ["{{base_url}}"],
-									"path": ["api", "admin", "places", "1", "reject"]
+									"path": ["api", "admin", "places", "1", "revoke"]
 								}
 							}
 						}
