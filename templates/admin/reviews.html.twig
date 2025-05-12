@@ -101,7 +101,10 @@ async function approveReview(reviewId) {
     try {
         const response = await fetch(`/api/admin/reviews/${reviewId}/approve`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            }
         });
         const data = await response.json();
         if (response.ok) {
@@ -119,7 +122,10 @@ async function rejectReview(reviewId) {
     try {
         const response = await fetch(`/api/admin/reviews/${reviewId}/reject`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            }
         });
         const data = await response.json();
         if (response.ok) {
@@ -138,7 +144,10 @@ async function deleteReview(reviewId) {
     try {
         const response = await fetch(`/api/admin/reviews/${reviewId}`, {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            }
         });
         const data = await response.json();
         if (response.ok) {
