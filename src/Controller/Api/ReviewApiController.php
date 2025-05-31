@@ -161,5 +161,60 @@ class ReviewApiController extends AbstractController
             'rating' => $review->getRating(),
             'createAt' => $review->getCreateAt()?->format('Y-m-d H:i:s'),
         ]);
-    }  
-} 
+    }
+
+	#[Route('/api/reviews/place/{placeId}', name: 'api_reviews_by_place', methods: ['GET'])]
+	#[IsGranted('IS_AUTHENTICATED_FULLY')]
+	public function reviewsByPlace(int $placeId, EntityManagerInterface $em): JsonResponse
+	{
+		$place = $em->getRepository(Place::class)->find($placeId);
+		if (!$place) {
+			return $this->json(['error' => 'Établissement non trouvé'], 404);
+		}
+		$reviews = $em->getRepository(Review::class)->findBy(['place' => $place]);
+		$data = [];
+		foreach ($reviews as $review) {
+			$data[] = [
+				'id' => $review->getId(),
+				'place' => [
+					'id' => $review->getPlace()->getId(),
+					'name' => $review->getPlace()->getName(),
+				],
+				'user' => [
+					'id' => $review->getUser()->getId(),
+					'pseudo' => $review->getUser()->getPseudo(),
+				],
+				'commentaire' => $review->getCommentaire(),
+				'rating' => $review->getRating(),
+				'createAt' => $review->getCreateAt()?->format('Y-m-d H:i:s'),
+			];
+		}
+		return $this->json($data);
+	}
+
+    #[Route('/api/admin/reviews/{id}/approve', name: 'api_review_approve', methods: ['PATCH'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function approve(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $review = $em->getRepository(Review::class)->find($id);
+        if (!$review) {
+            return $this->json(['message' => 'Review not found'], 404);
+        }
+        $review->setStatut('approuvé');
+        $em->flush();
+        return $this->json(['message' => 'Review approved successfully']);
+    }
+
+    #[Route('/api/admin/reviews/{id}/reject', name: 'api_review_reject', methods: ['PATCH'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function reject(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $review = $em->getRepository(Review::class)->find($id);
+        if (!$review) {
+            return $this->json(['message' => 'Review not found'], 404);
+        }
+        $review->setStatut('refusé');
+        $em->flush();
+        return $this->json(['message' => 'Review rejected successfully']);
+    }
+}

@@ -60,7 +60,7 @@ class PlaceApiController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function list(EntityManagerInterface $em): JsonResponse
     {
-        $places = $em->getRepository(Place::class)->findBy(['statut' => 'Validé']);
+        $places = $em->getRepository(Place::class)->findBy(['statut' => 'validé']);
         $data = [];
         foreach ($places as $place) {
             $data[] = [
@@ -84,7 +84,7 @@ class PlaceApiController extends AbstractController
     public function show(EntityManagerInterface $em, int $id): JsonResponse
     {
         $place = $em->getRepository(Place::class)->find($id);
-        if (!$place || $place->getStatut() !== 'Validé') {
+        if (!$place || $place->getStatut() !== 'validé') {
             return $this->json(['error' => 'Établissement non trouvé ou non validé.'], 404);
         }
         return $this->json([
