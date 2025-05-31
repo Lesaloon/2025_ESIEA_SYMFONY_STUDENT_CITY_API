@@ -190,7 +190,7 @@ class UserApiController extends AbstractController
 			}
 			$user = $userEntity;
 		}
-		
+
 		$data = json_decode($request->getContent(), true);
 		if (json_last_error() !== JSON_ERROR_NONE) {
 			return $this->json([
@@ -198,7 +198,7 @@ class UserApiController extends AbstractController
 				'message' => 'Données JSON invalides'
 			], JsonResponse::HTTP_BAD_REQUEST);
 		}
-		
+
 		if (isset($data['pseudo'])) {
 			$user->setPseudo($data['pseudo']);
 		}
@@ -208,9 +208,9 @@ class UserApiController extends AbstractController
 		if (!empty($data['plainPassword'])) {
 			$user->setPassword($passwordHasher->hashPassword($user, $data['plainPassword']));
 		}
-		
+
 		$this->entityManager->flush();
-		
+
 		return $this->json([
 			'success' => true,
 			'message' => 'Utilisateur mis à jour avec succès',
