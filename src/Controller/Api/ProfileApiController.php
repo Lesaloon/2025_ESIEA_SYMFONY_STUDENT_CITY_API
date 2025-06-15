@@ -23,14 +23,18 @@ class ProfileApiController extends AbstractController
 		$this->entityManager = $entityManager;
 	}
 
-	#[Route('/api/profile/{id}', name: 'api_profile_update_by_id', methods: ['PUT'])]
+	#[Route(
+		'/api/profiles/{id}',
+		name: 'api_profile_update_by_id',
+		methods: ['PUT'],
+		requirements: ['id' => '\d+']        // only match numeric IDs
+	)]
 	#[IsGranted('IS_AUTHENTICATED_FULLY')]
 	public function updateProfileById(
-		string $id,
+		int $id,
 		Request $request,
 		UserPasswordHasherInterface $passwordHasher
 	): JsonResponse {
-		$id = (int) $id;
 
 		try {
 			/** @var User $currentUser */
@@ -115,7 +119,11 @@ class ProfileApiController extends AbstractController
 		}
 	}
 
-	#[Route('/api/profiles/me', name: 'api_profile_update_me', methods: ['PUT'])]
+	#[Route(
+		'/api/profile/me',                    // singular “profile” to avoid collision
+		name: 'api_profile_update_me',
+		methods: ['PUT']
+	)]
 	#[IsGranted('IS_AUTHENTICATED_FULLY')]
 	public function updateProfileMe(
 		Request $request,
