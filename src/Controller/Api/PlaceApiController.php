@@ -21,6 +21,18 @@ class PlaceApiController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $place = new Place();
+		/*
+XHRPOST
+http://localhost:8000/api/places
+[HTTP/1.1 400 Bad Request 30ms]
+
+adresse	'éi"roijfnqklapopoa'
+description	"czoef,éoiefjoenui"
+latitude	43.70084232210959
+longitude	-1.0442186242675744
+name	"fzadadafzaa,dp"
+type	"restaurant"
+		*/
         $form = $this->createForm(PlaceType::class, $place);
         $form->submit($data);
 
