@@ -26,10 +26,12 @@ class ProfileApiController extends AbstractController
 	#[Route('/api/profile/{id}', name: 'api_profile_update_by_id', methods: ['PUT'])]
 	#[IsGranted('IS_AUTHENTICATED_FULLY')]
 	public function updateProfileById(
-		int $id,
+		string $id,
 		Request $request,
 		UserPasswordHasherInterface $passwordHasher
 	): JsonResponse {
+		$id = (int) $id;
+
 		try {
 			/** @var User $currentUser */
 			$currentUser = $this->getUser();
